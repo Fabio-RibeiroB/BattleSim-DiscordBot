@@ -16,8 +16,8 @@ def battle_simulation(Player1: str, Player2: str) -> str:
     with open('battle_data.json', 'r') as f:
         stats = json.load(f)
    
-    Player1Type = stats[Player1]['Type']
-    Player2Type = stats[Player2]['Type']
+    Player1Type = stats[Player1]['Class']
+    Player2Type = stats[Player2]['Class']
     Player1CritNumber = stats[Player1]['CritNumber']
 
     Player2CritNumber = stats[Player2]['CritNumber']
@@ -110,6 +110,7 @@ def battle_simulation(Player1: str, Player2: str) -> str:
     
     except Excepton as e:
         print(e)
+        
 def fair_fight_decider(PlayerClass: str) -> bool:
     """Decide whether the chosen class is fair."""
     template = """

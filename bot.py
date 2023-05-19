@@ -23,6 +23,8 @@ intents.members = True
 import discord
 from discord import app_commands
 import os
+from battle_simulation import fair_fight_decider
+import json
 
 guild_id = os.getenv("GUILD_ID")
 
@@ -62,6 +64,41 @@ async def help(interaction: discord.Interaction):
 async def leaderboard(interaction: discord.Interaction):
     await interaction.response.send_message(f" \
             Leaderboard: to be implemented", ephemeral = True)
+
+@tree.command(guild = discord.Object(id=guild_id), name = 'class', description='Create or Change your character\'s class')
+async def modify_character_class(interaction: discord.Interaction, character_class: str):
+    
+    try:
+        if fair_fight_decider(character_class):
+        
+            Player = interaction.user.name
+            
+            # Check if the user exists
+            with open('battle_data.json', 'r') as f:
+                stats = json.load(f)
+
+            if interaction.user in stats: # user exists
+                stats[Player]['Class'] = character_class
+                with open('battle_data.json', 'w') as f:
+                    json.dump(stats, f)
+
+                await interaction.response.send_message(f"{interaction.user.mention}, changing you class to: {character_class}")
+                
+            else: # user does not exist
+                stats[Player] = dict()
+                stats[Player]['Class'] = character_class
+                stats[Player]['Wins'] = 0
+                stats[Player]['CritNumber'] = 2
+
+                with open('battle_data.json', 'w') as f:
+                    json.dump(stats, f)
+
+                await interaction.response.send_message(f" Welcome {interaction.user.mention} to the Discord BattleSim! Your class is: {character_class}", ephemeral = False)
+        else:
+            await interaction.response.send_message(f"{interaction.user.mention}, your class was not approved. Try again.")
+    except Exception as e:
+        print(e)
+
 
 @tree.command(guild = discord.Object(id=guild_id), name = 'fight', description='Enter fighting arena!')
 async def fight(interaction: discord.Interaction):
