@@ -100,9 +100,29 @@ async def modify_character_class(interaction: discord.Interaction, character_cla
         print(e)
 
 
+
+async def battle(interaction: discord.Interaction):
+    # Implement battle...
+
+#Create a list to store usres in the battle queue
+battle_queue = []
+
 @tree.command(guild = discord.Object(id=guild_id), name = 'fight', description='Enter fighting arena!')
 async def fight(interaction: discord.Interaction):
-    await interaction.response.send_message(f" \
-            {interaction.user.mention} entered the fight! (Work in progress)", ephemeral = False) 
+
+    Player = interaction.user.name
+
+    battle_queue.append(Player)
+
+    if len(battle_queue) == 2:
+        # Start the battle if there are two users
+        await interaction.response.send_message("Battle starting...") # wip
+
+    else:
+        await interaction.response.send_message(f" \
+            {interaction.user.mention} entered the fight queue...", ephemeral = False) 
+
+    
+
 
 client.run(os.getenv("DISCORD_TOKEN"))
