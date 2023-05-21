@@ -1,6 +1,11 @@
 import discord
 from dotenv import load_dotenv
 from discord.ext import commands
+from typing import List
+import discord.utils
+import random
+from crit_numbers import find_victor
+import asyncio
 load_dotenv()
 
 intents = discord.Intents.all()
@@ -23,7 +28,7 @@ intents.members = True
 import discord
 from discord import app_commands
 import os
-from battle_simulation import fair_fight_decider
+from battle_simulation import fair_fight_decider, battle_simulation
 import json
 
 guild_id = os.getenv("GUILD_ID")
@@ -60,10 +65,37 @@ async def help(interaction: discord.Interaction):
 
     await interaction.response.send_message(message, ephemeral = True)
 
-@tree.command(guild = discord.Object(id=guild_id), name = 'lb', description='Show figher leaderboard')
+# @tree.command(guild = discord.Object(id=guild_id), name = 'lb', description='Show figher leaderboard')
+# async def leaderboard(interaction: discord.Interaction):
+    
+#     with open('battle_data.json', 'r') as f:
+#         stats = json.load(f) # {"Player1": {"Wins":0}}
+
+#     await interaction.response.send_message(f" \
+#             Leaderboard: to be implemented", ephemeral = True)
+
+import json
+import discord.utils
+from tabulate import tabulate
+
+@tree.command(guild=discord.Object(id=guild_id), name='lb', description='Show fighter leaderboard')
 async def leaderboard(interaction: discord.Interaction):
-    await interaction.response.send_message(f" \
-            Leaderboard: to be implemented", ephemeral = True)
+    with open('battle_data.json', 'r') as f:
+        stats = json.load(f)  # {"Player1": {"Wins": 0}, "Player2": {"Wins": 2}, ...}
+
+    leaderboard_data = []
+    for player, data in stats.items():
+        wins = data["Wins"]
+        leaderboard_data.append([player, wins])
+
+    # Sort leaderboard data by number of wins in descending order
+    leaderboard_data.sort(key=lambda x: x[1], reverse=True)
+
+    headers = ["Player", "Wins"]
+    table = tabulate(leaderboard_data, headers, tablefmt="fancy_grid")
+
+    await interaction.response.send_message(f"```\n{table}\n```", ephemeral=True)
+
 
 @tree.command(guild = discord.Object(id=guild_id), name = 'class', description='Create or Change your character\'s class')
 async def modify_character_class(interaction: discord.Interaction, character_class: str):
@@ -99,10 +131,43 @@ async def modify_character_class(interaction: discord.Interaction, character_cla
     except Exception as e:
         print(e)
 
-
-
 async def battle(interaction: discord.Interaction):
-    # Implement battle...
+    # Get the two players from the battle queue
+    player1 = battle_queue[0]
+    player2 = battle_queue[1]
+
+    # Remove the players from the battle queue
+    battle_queue.clear()
+    print(battle_queue)
+
+    # Tag the players in the battle message
+    player1_mention = player1.mention 
+    player2_mention = player2.mention
+
+
+    await interaction.channel.send("The fight is about to begin!")
+    await asyncio.sleep(1)  # Introduce a 2-second delay for dramatic effect
+    await interaction.channel.send(f"The battle between {player1_mention} and {player2_mention} is on!")
+
+    print(player1.name, player2.name)
+    # Simulate the battle
+    response = battle_simulation(player1.name, player2.name)
+    victor = find_victor(response).lower()
+
+    print(victor)
+    
+
+
+    #await interaction.channel.send(f"The battle between {player1_mention} and {player2_mention} is over! The winner is {winner}!")
+    await interaction.channel.send(response)
+
+    if victor == player1.name:
+        await interaction.channel.send(f'{player1_mention} won')
+    elif victor == player2.name:
+        await interaction.channel.send(f'{player2_mention} won')
+
+    
+
 
 #Create a list to store usres in the battle queue
 battle_queue = []
@@ -110,19 +175,20 @@ battle_queue = []
 @tree.command(guild = discord.Object(id=guild_id), name = 'fight', description='Enter fighting arena!')
 async def fight(interaction: discord.Interaction):
 
-    Player = interaction.user.name
+    player = interaction.user
 
-    battle_queue.append(Player)
+    if not True: #player in battle_queue:
+        await interaction.response.send_message(f"{player.mention} is already in the fight queue.", ephemeral=False)
+    else:
+        battle_queue.append(player)
+        await interaction.response.send_message(f"{player.mention} entered the fight queue.", ephemeral=False)
+
 
     if len(battle_queue) == 2:
         # Start the battle if there are two users
-        await interaction.response.send_message("Battle starting...") # wip
+        await asyncio.sleep(10)  # Introduce a delay of 5 seconds before starting the battle
+        await battle(interaction)
 
-    else:
-        await interaction.response.send_message(f" \
-            {interaction.user.mention} entered the fight queue...", ephemeral = False) 
-
-    
 
 
 client.run(os.getenv("DISCORD_TOKEN"))

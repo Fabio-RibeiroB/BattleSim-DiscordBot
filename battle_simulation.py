@@ -12,12 +12,13 @@ from crit_numbers import critical_hit_numbers, training, find_victor
 load_dotenv()
 
 def battle_simulation(Player1: str, Player2: str) -> str:
-
+    print('Start fight')
     with open('battle_data.json', 'r') as f:
         stats = json.load(f)
-   
+    print('Loaded stats...')
     Player1Type = stats[Player1]['Class']
     Player2Type = stats[Player2]['Class']
+    print('Got players stats...')
     Player1CritNumber = stats[Player1]['CritNumber']
 
     Player2CritNumber = stats[Player2]['CritNumber']
@@ -89,7 +90,7 @@ def battle_simulation(Player1: str, Player2: str) -> str:
         prompt=prompt,
         llm=llm
     )
-
+    print('Trying chain...')
     try:
         response = llm_chain.run({
                                     "Player1": Player1, 
@@ -98,7 +99,11 @@ def battle_simulation(Player1: str, Player2: str) -> str:
                                     "Player2Type": Player2Type
                                 })
         
-        victor = find_victor(response)
+        print('Ran chain...')
+        
+        victor = find_victor(response).lower()
+
+        print('Found victor...')
 
         if victor in stats.keys():
             stats[victor]['Wins']+=1
@@ -107,9 +112,11 @@ def battle_simulation(Player1: str, Player2: str) -> str:
                 json.dump(stats, f)
 
             return response
+        return f'{victor} not in Keys'
     
-    except Excepton as e:
+    except Exception as e:
         print(e)
+        return 'Unknown'
         
 def fair_fight_decider(PlayerClass: str) -> bool:
     """Decide whether the chosen class is fair."""
