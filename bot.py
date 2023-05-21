@@ -4,7 +4,7 @@ from discord.ext import commands
 from typing import List
 import discord.utils
 import random
-from crit_numbers import find_victor
+from crit_numbers import find_victor, training
 import asyncio
 load_dotenv()
 
@@ -48,22 +48,45 @@ class aclient(discord.Client):
 client = aclient()
 tree = app_commands.CommandTree(client)
 
-@tree.command(guild = discord.Object(id=guild_id), name = 'help', description='Intro and info') #guild specific slash command
+# @tree.command(guild = discord.Object(id=guild_id), name = 'help', description='Intro and info') #guild specific slash command
+# async def help(interaction: discord.Interaction):
+
+#     message = """\
+#     I am a Battle Simulator! Train, get stronger and rise up the leaderboard!
+
+#     Features:
+#     1. Create your character/class (/class)
+
+#     2. Two User fights (/fight)
+
+#     3. Train (or Win) to get stronger (/train)
+
+#     4. View Leaderboard (/lb)"""
+
+#     await interaction.response.send_message(message, ephemeral = True)
+
+@tree.command(guild=discord.Object(id=guild_id), name='help', description='Intro and info')  # guild-specific slash command
 async def help(interaction: discord.Interaction):
-
+    
     message = """\
-    I am a Battle Simulator! Train, get stronger and rise up the leaderboard!
+    🌳 **Welcome to the Battle Simulator!** 🌳
 
-    Features:
-    1. Create your character/class (/class)
+    I am here to help you train, get stronger, and rise up the leaderboard! Let's explore the exciting features:
 
-    2. Two User fights (/fight me)
+    **Features:**
+    1️⃣ Create your character/class: `/class`
 
-    3. Train (or Win) to get stronger (/train)
+    2️⃣ Engage in thrilling battles: `/fight`
 
-    4. View Leaderboard (/lb)"""
+    3️⃣ Train or win to increase your strength: `/train`
 
-    await interaction.response.send_message(message, ephemeral = True)
+    4️⃣ View the Leaderboard: `/lb`
+
+    🚀 Get started now and embark on your epic journey in the Battle Simulator! 🚀
+    """
+
+    await interaction.response.send_message(message, ephemeral=True)
+
 
 # @tree.command(guild = discord.Object(id=guild_id), name = 'lb', description='Show figher leaderboard')
 # async def leaderboard(interaction: discord.Interaction):
@@ -148,7 +171,7 @@ async def battle(interaction: discord.Interaction):
     await interaction.channel.send("The fight is about to begin!")
     await asyncio.sleep(1)  # Introduce a 2-second delay for dramatic effect
     await interaction.channel.send(f"The battle between {player1_mention} and {player2_mention} is on!")
-
+    
     print(player1.name, player2.name)
     # Simulate the battle
     response = battle_simulation(player1.name, player2.name)
@@ -156,7 +179,7 @@ async def battle(interaction: discord.Interaction):
 
     print(victor)
     
-
+    await asyncio.sleep(3)
 
     #await interaction.channel.send(f"The battle between {player1_mention} and {player2_mention} is over! The winner is {winner}!")
     await interaction.channel.send(response)
@@ -177,7 +200,15 @@ async def fight(interaction: discord.Interaction):
 
     player = interaction.user
 
-    if not True: #player in battle_queue:
+    with open('battle_data.json', 'r') as f:
+        stats = json.load(f)  # {"Player1": {"Wins": 0}, "Player2": {"Wins": 2}, ...}
+
+
+    if player.name not in stats:
+        await interaction.response.send_message(f"{player.mention} type /class first!", ephemeral=False)
+        return
+
+    if player in battle_queue:
         await interaction.response.send_message(f"{player.mention} is already in the fight queue.", ephemeral=False)
     else:
         battle_queue.append(player)
@@ -189,6 +220,22 @@ async def fight(interaction: discord.Interaction):
         await asyncio.sleep(10)  # Introduce a delay of 5 seconds before starting the battle
         await battle(interaction)
 
+@tree.command(guild = discord.Object(id=guild_id), name = 'train', description='Get stronger')
+async def train(interaction: discord.Interaction):
 
+    player = interaction.user
+
+    with open('battle_data.json', 'r') as f:
+        stats = json.load(f)  # {"Player1": {"Wins": 0}, "Player2": {"Wins": 2}, ...}
+
+
+    if player.name not in stats:
+        await interaction.response.send_message(f"{player.mention} type /class first!", ephemeral=False)
+        return
+
+    training(player.name)
+
+    await interaction.response.send_message(f"{player.mention} trained hard and got stronger!", ephemeral=False)
+    
 
 client.run(os.getenv("DISCORD_TOKEN"))

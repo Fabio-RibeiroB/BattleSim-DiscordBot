@@ -23,9 +23,9 @@ def battle_simulation(Player1: str, Player2: str) -> str:
 
     Player2CritNumber = stats[Player2]['CritNumber']
 
-    CritNumber = critical_hit_numbers(1)
-    Player1CritNumbers = critical_hit_numbers(Player1CritNumber)
-    Player2CritNumbers = critical_hit_numbers(Player2CritNumber)
+    CritNumber = critical_hit_numbers(1, 1000)
+    Player1CritNumbers = critical_hit_numbers(Player1CritNumber, 1000)
+    Player2CritNumbers = critical_hit_numbers(Player2CritNumber, 1000)
     
 
     if (CritNumber in Player1CritNumbers) and (CritNumber not in Player2CritNumbers):
@@ -100,8 +100,10 @@ def battle_simulation(Player1: str, Player2: str) -> str:
                                 })
         
         print('Ran chain...')
-        
+        print(response)
         victor = find_victor(response).lower()
+
+        print(victor)
 
         print('Found victor...')
 
@@ -114,12 +116,23 @@ def battle_simulation(Player1: str, Player2: str) -> str:
             return response
         return f'{victor} not in Keys'
     
-    except Exception as e:
-        print(e)
-        return 'Unknown'
+    except:
+        return 'Error Try Again'
         
 def fair_fight_decider(PlayerClass: str) -> bool:
     """Decide whether the chosen class is fair."""
+
+    def contains_unliked_word(target, string_list):
+        for word in string_list:
+            if word in target:
+                return True
+        return False
+
+    banned_list = ['god', 'thanos', 'jesus', 'invincible', 'unkillable']
+
+    if contains_unliked_word(PlayerClass.lower(), banned_list):
+        return False
+    
     template = """
 
     You are oversee fantasy fights and decide whether a character is beatable by a regular class like Mage or Knight. 

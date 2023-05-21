@@ -3,14 +3,14 @@ from typing import List
 import json
 import re
 
-def critical_hit_numbers(n: int) -> List:
+def critical_hit_numbers(n: int, mx: int) -> List:
     """Generate n critical hit numbers at random"""
-    if n == 1: return random.randint(1,10)
-    else: return [random.randint(1,10) for i in range(n)]
+    if n == 1: return random.randint(1, mx)
+    else: return [random.randint(1, mx) for i in range(n)]
 
 def training(Player: str) -> None:
     """Increase crit hit number score by random amount"""
-    boost = critical_hit_numbers(1)
+    boost = critical_hit_numbers(1, 10)
 
     with open('battle_data.json', 'r') as f:
         stats = json.load(f)
@@ -27,4 +27,4 @@ def find_victor(text: str) -> bool:
     if match:
         return match.group(1).rstrip('.')
     else:
-        return None
+        return 'Error'
