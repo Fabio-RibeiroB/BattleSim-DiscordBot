@@ -71,6 +71,8 @@ async def help(interaction: discord.Interaction):
     message = """\
     🌳 **Welcome to the Battle Simulator!** 🌳
 
+    ⚠️ **Warning: This is a test release. Please note that leaderboard data may be reset during this phase.** ⚠️
+
     I am here to help you train, get stronger, and rise up the leaderboard! Let's explore the exciting features:
 
     **Features:**
