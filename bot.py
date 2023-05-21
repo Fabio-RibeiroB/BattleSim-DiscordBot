@@ -2,34 +2,21 @@ import discord
 from dotenv import load_dotenv
 from discord.ext import commands
 from typing import List
+from discord import app_commands
 import discord.utils
 import random
 from crit_numbers import find_victor, training
 import asyncio
+import os
+from battle_simulation import fair_fight_decider, battle_simulation
+import json
+
+
 load_dotenv()
 
 intents = discord.Intents.all()
 
 intents.members = True
-
-# bot = commands.Bot(command_prefix="!fight", intents=intents)
-
-# @bot.hybrid_command(name="first_slash")
-# async def first_slash(ctx): 
-#    await ctx.send("You executed the slash command!") #respond no longer works, so i changed it to send
-
-# @bot.event
-# async def on_ready():
-#    await bot.sync() #sync the command tree
-#    print("Bot is ready and online")
-
-# bot.run(os.getenv("DISCORD_TOKEN"))
-
-import discord
-from discord import app_commands
-import os
-from battle_simulation import fair_fight_decider, battle_simulation
-import json
 
 guild_id = os.getenv("GUILD_ID")
 
